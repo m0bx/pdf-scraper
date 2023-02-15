@@ -1,21 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
 
-# Read initial URL from text file
-with open('start_urls.txt', 'r') as f:
-    url = f.read().strip()
+def scrape_links(url):
+    # Make request to URL and get page content
+    response = requests.get(url)
+    content = response.content
 
-response = requests.get(url)
-content = response.content
+    # Parse page content using BeautifulSoup
+    soup = BeautifulSoup(content, 'html.parser')
 
-# parse page content
-soup = BeautifulSoup(content, 'html.parser')
+    # Find all links on the page
+    links = soup.find_all('a')
 
-# find all links on the page
-links = soup.find_all('a')
-
-with open('links.txt', 'a') as f:
+    # Create list of links that end with ".pdf"
+    pdf_links = []
     for link in links:
         href = link.get('href')
         if href is not None and href.startswith('http') and href.endswith('.pdf'):
-            f.write(href + '\n')
+            pdf_links.append(href)
+
+    # Return list of PDF links
+    return pdf_links
