@@ -6,10 +6,12 @@ from bs4 import BeautifulSoup
 def scrape_link(url, headers):
 	# Make request to URL and get page content
 	try:
-		response = requests.get(str(url), headers=headers)
+		print("trying request at page:" + str(url))
+
+		response = requests.get(str(url), headers=headers, timeout=3)
 		print("success at page:" + str(url))
-	except Exception as error:
-		raise Exception(str(error))
+	except Exception as error3:
+		raise Exception(str(error3))
 	content = response.content
 
 	# Parse page content using BeautifulSoup
@@ -31,19 +33,29 @@ def scrape_link(url, headers):
 
 if __name__ == "__main__":
 	# Config stuff
+	clear_indexed = input("Do you want to erase indexed before you start the process? y/n \n")
+	if clear_indexed == "y":
+		try:
+			open("indexed.txt", "w").close()
+		except FileNotFoundError:
+			print("You dont even have indexed file setup yet ...")
+	elif clear_indexed != "n":
+		exit()
 	try:
 		with open('config.json', 'r') as cfg:
 			config = json.load(cfg)
-	except:
+	except Exception as e:
 		print("Error parsing config file contents, repairing or creating config.json")
-		cfg_setup = {"depth": 2, "start": "https://www.gamca.sk"}
-		with open("config.json", 'w') as cfg:
-			json.dump(cfg_setup, cfg)
-			config = json.load(cfg)
-			cfg.close()
+		cfg_setup = {"depth": 2, "start": ['https://pdfix.net']}
+		cfg = open("config.json", 'w')
+		json.dump(cfg_setup, cfg)
+		cfg.close()
+		cfg = open("config.json", 'r+')
+		config = json.load(cfg)
 
 	# Load stuff from cfg
 	depth = config["depth"]
+	starter_urls = config["start"]
 	urls = config["start"]
 	print("Loaded configs; depth:" + str(depth) + ", urls: " + str(urls))
 
@@ -62,9 +74,6 @@ if __name__ == "__main__":
 	"""
 	# Indexed urls
 	try:
-		# code line bellow clears indexed for now
-		open("indexed.txt", "w").close()
-
 		indexed_urls = []
 		indexed_urls_file = open("indexed.txt", "r+")
 		for line in indexed_urls_file:
@@ -100,14 +109,14 @@ if __name__ == "__main__":
 			# Checks if page is not in indexed urls, does nothing and skips the url if it already was scraped
 			if str(page).endswith('.pdf') and page not in indexed_urls:
 				# Appends pdf destination URL to a file
-				pdfs.append(page + "\n")
 				print("\nFound PDF file\n")
+				pdfs.write(str(page) + "\n")
 				# Stats
-				#total_pdfs_count += 1
-				#total_url_count += 1
-			elif page not in indexed_urls:
+				# total_pdfs_count += 1
+				# total_url_count += 1
+			elif page not in indexed_urls:  # or page in starter_urls
 				# Stats
-				#total_url_count += 1
+				# total_url_count += 1
 				# Adds page to indexed
 				indexed_urls.append(page)
 				indexed_urls_file.write(str(page) + "\n")
@@ -122,8 +131,7 @@ if __name__ == "__main__":
 				for a in new_links:
 					urls.append(str(a))
 
-			# Stats
-		#stats_upload = {"Total": total_url_count, "Found": total_pdfs_count}
-		#json.dump(stats_upload, stats)
-		print("Json file updates now")
+		# Stats
+		# stats_upload = {"Total": total_url_count, "Found": total_pdfs_count}
+		# json.dump(stats_upload, stats)
 	print("\n\n### Finished ###")
