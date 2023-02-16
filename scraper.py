@@ -46,7 +46,7 @@ if __name__ == "__main__":
 			config = json.load(cfg)
 	except Exception as e:
 		print("Error parsing config file contents, repairing or creating config.json")
-		cfg_setup = {"depth": 2, "start": ['https://pdfix.net']}
+		cfg_setup = {"depth": 2, "start": ['https://www.zakopcie.sk']}
 		cfg = open("config.json", 'w')
 		json.dump(cfg_setup, cfg)
 		cfg.close()
