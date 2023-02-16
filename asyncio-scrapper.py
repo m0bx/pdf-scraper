@@ -123,7 +123,9 @@ if __name__ == "__main__":
 			update_json_value("pdfs.json", "urls", pdfs_array_temp)
 			print("Something updated in the pdfs.json file.")
 			pdfs_array_temp = []
-
+		data = dict(indexed_urls)
+		with open("indexed.json", 'w') as f:
+			json.dump(data, f)
 
 
 	print("\n\n### Finished ###")
