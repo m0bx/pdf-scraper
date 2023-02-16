@@ -46,8 +46,8 @@ async def fetch(session, url):
 		async with session.get(url, headers={
 			'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36'}) as response:
 			return await response.text()
-	except Exception as e:
-		print("Error " + str(e) + " ...  " + str(url))
+	except Exception:
+		print("Error " + response.status + "  ...  " + str(url))
 
 
 # Part of the fetch code, gathers html data as a response from the fun above.
