@@ -33,7 +33,7 @@ def clear_indexed():
 def update_json_value(file_path, key, new_values):
 	with open(file_path, 'r') as f:
 		data = json.load(f)
-	data[key].append(new_values)
+	data[key].append(values for values in new_values)
 	with open(file_path, 'w') as f:
 		json.dump(data, f)
 
@@ -123,6 +123,7 @@ if __name__ == "__main__":
 			update_json_value("pdfs.json", "urls", pdfs_array_temp)
 			print("Something updated in the pdfs.json file.")
 			pdfs_array_temp = []
+
 
 
 	print("\n\n### Finished ###")
