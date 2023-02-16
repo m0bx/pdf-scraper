@@ -1,4 +1,4 @@
-import json, asyncio, aiohttp
+import json, asyncio, aiohttp, os
 from bs4 import BeautifulSoup
 
 
@@ -19,23 +19,13 @@ def load_json(filename, settings):
 	return contents
 
 
-def clear_indexed():
-	boolean_indexed = input("Do you want to erase indexed before you start the process? y/n \n")
-	if boolean_indexed == "y":
-		try:
-			open("indexed.json", "w").close()
-		except FileNotFoundError:
-			print("You dont even have indexed file setup yet ...")
-	elif boolean_indexed != "n":
-		exit()
-
-
 def update_json_value(file_path, key, new_values):
 	with open(file_path, 'r') as f:
 		data = json.load(f)
 	data[key].append(values for values in new_values)
 	with open(file_path, 'w') as f:
-		json.dump(data, f)
+		if data is not None:
+			json.dump(data, f)
 
 
 ########################################################################################################################
@@ -81,48 +71,45 @@ async def fetch_and_extract_links_multiple(urls):
 
 if __name__ == "__main__":
 	# Code to clear indexed file
-	clear_indexed()
+
 
 	# Code to handle config.json, and to load config files
-	config_setup = {"depth": 2, "start": ['https://pdfix.net']}
-	config = load_json("config", config_setup)
-	depth = config["depth"]
-	starter_urls, urls = config["start"]
-	print("Loaded configs; depth:" + str(depth) + ", starting urls: " + str(starter_urls))
-
-	# Code to handle indexed URLs database
-	indexed_setup = {}
-	indexed_urls = []
-	indexed_json = load_json("indexed", indexed_setup)
-	if len(indexed_json) != 0:
-		for page in indexed_json:
-			indexed_urls.append(page)
+	depth = 2
+	urls = [""]
+	print("Starting with depth:" + str(depth))
 
 	# PDFs file
-	pdf_setup = {'urls'}
-	pdfs = []
-	pdfs = load_json("pdfs", pdf_setup)
-	pdfs_array_temp = []
+	pdfs_txt = open("pdfs.txt", "a+")  # a+ is for appending at the end, file will be created if it doesn't exist
+	pdfs_temp = []
+	# Code to handle indexed URLs database
+	indexed_urls = []
+	indexed_database = open("indexed.txt", "r")
+	# Loads data from indexed_database if not empty
+	if int(os.stat(indexed_database).st_size) != 0:
+		for line in indexed_database:
+			indexed_urls.append(line.strip())
+	indexed_database.close()
+	indexed_database = open("indexed.txt", "r")
 
 	# Main script
 	for i in range(depth):
 		for page in urls:
 			if str(page).lower().endswith('.pdf') and page not in indexed_urls:
-				pdfs_array_temp.append(str(page))
+				pdfs_temp.append(str(page))
 				indexed_urls.append(str(page))
 				urls.pop(page)
 			if page in indexed_urls:
 				urls.pop(page)
 
 		new_urls = asyncio.run(fetch_and_extract_links_multiple(urls))
-		await asyncio.gather(new_urls)
 		urls = new_urls
 
 		# Updating PDFs and new indexed URLs database
-		if len(pdfs_array_temp) != 0:
-			update_json_value("pdfs.json", "urls", pdfs_array_temp)
-			print("Something updated in the pdfs.json file.")
-			pdfs_array_temp = []
+		if len(pdfs_temp) != 0:
+			for url in pdfs_temp:
+				pdfs_txt.append()
+			print("Something updated in the pdfs.txt file.")
+			pdfs_temp = []
 		data = dict(indexed_urls)
 		with open("indexed.json", 'w') as f:
 			json.dump(data, f)
