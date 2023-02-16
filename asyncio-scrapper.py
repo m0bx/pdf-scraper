@@ -33,7 +33,7 @@ def clear_indexed():
 def update_json_value(file_path, key, new_values):
 	with open(file_path, 'r') as f:
 		data = json.load(f)
-	data[key] += new_values
+	data[key].append(new_values)
 	with open(file_path, 'w') as f:
 		json.dump(data, f)
 
